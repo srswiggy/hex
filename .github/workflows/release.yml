@@ -31,10 +31,10 @@ jobs:
       id: create_release
       uses: actions/create-release@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # GitHub automatically creates this secret to authenticate in your workflow
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref }}  # This can be customized as needed
-        release_name: Release ${{ github.ref }}
+        tag_name: ${{ github.sha }}
+        release_name: Release ${{ github.sha }}
         draft: false
         prerelease: false
 
