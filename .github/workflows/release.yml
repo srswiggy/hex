@@ -27,6 +27,9 @@ jobs:
       run: |
         GOOS=darwin GOARCH=amd64 go build -o hex
 
+    - name: Give Executable Permission
+      run: chmod +x ./hex
+
     - name: Prepare release tag
       id: prep
       run: echo "::set-output name=tag::v1.0.0-$(date +'%Y%m%d%H%M%S')"
