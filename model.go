@@ -67,7 +67,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if len(selectedServices) == 0 {
 				return m, cmd
 			}
-			return secondModel{filteredServicesList: selectedServices}, nil
+			ti := textinput.New()
+			ti.Focus()
+			ti.Placeholder = "Enter Snapshot Tag for Service"
+			return secondModel{filteredServicesList: selectedServices, snapshotDataTextBox: ti}, nil
 		} else if msg.String() == " " || msg.Type == tea.KeySpace {
 			if m.filteredServicesList[m.pointer].selected {
 				m.filteredServicesList[m.pointer].selected = false

@@ -31,16 +31,9 @@ type ConfigFile struct {
 func createAndSaveJson(envName string, services []*Service) {
 	var configServices []Services
 	for _, service := range services {
-		configServices = append(configServices, Services{
-			Name:              service.name,
-			Version:           service.input,
-			DependentServices: make([]string, 0),
-			IsMockService:     false,
-			CommitSha:         "",
-			File:              "app.yaml",
-			BranchName:        "",
-			Repo:              "",
-		})
+		config := getServicesConfig(service.name)
+		config.Version = service.input
+		configServices = append(configServices, config)
 	}
 	newConfig := &ConfigFile{
 		EnvName:  envName,
@@ -60,23 +53,69 @@ func createAndSaveJson(envName string, services []*Service) {
 	}
 }
 
-func deployJson() string {
+func deployJson(envname string) string {
 	filename := "output.json"
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
 		fmt.Printf("File does not exist: %s\n", filename)
 		return "File does not exist"
 	}
 
-	// Create the cat command with the filename
-	cmd := exec.Command("cat", filename)
+	// Create the qgp command with the filename
+	cmd := exec.Command("qgp", "update", "instance", "--updateServices=true", "-n="+envname, "-f="+filename)
 
 	// Execute the command and get the output
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		fmt.Printf("Failed to execute command: %s\n", err)
-		return "Failed to execute command."
+		outputMessage := fmt.Sprintf("Failed to execute command: %s\n", err, string(output))
+		return outputMessage
 	}
 
 	// Return the output
 	return string(output)
+}
+
+func getServicesConfig(serviceName string) Services {
+	var servicesConfigMap = make(map[string]Services)
+
+	servicesConfigMap["finance-calcy-service"] = Services{
+		Name:              "finance-calcy-service",
+		DependentServices: make([]string, 0),
+		IsMockService:     false,
+		CommitSha:         "",
+		File:              "app.yaml",
+		BranchName:        "master",
+		Repo:              "finance-calcy-service",
+	}
+
+	servicesConfigMap["finance-job-service"] = Services{
+		Name:              "finance-job-service",
+		DependentServices: []string{"finance-calcy-service"},
+		IsMockService:     false,
+		CommitSha:         "",
+		File:              "app.yaml",
+		BranchName:        "master",
+		Repo:              "finance-job",
+	}
+
+	servicesConfigMap["finance-dashboard"] = Services{
+		Name:              "finance-dashboard",
+		DependentServices: []string{"finance-calcy-service", "lassi"},
+		IsMockService:     false,
+		CommitSha:         "",
+		File:              "app.yaml",
+		BranchName:        "master",
+		Repo:              "finance-dashboard",
+	}
+
+	servicesConfigMap["finance-orchestrator"] = Services{
+		Name:              "finance-orchestrator",
+		DependentServices: []string{"finance-recon-platform", "finance-scheduler-service", "finance-calcy-service"},
+		IsMockService:     false,
+		CommitSha:         "",
+		File:              "app.yaml",
+		BranchName:        "master",
+		Repo:              "finance-orchestrator",
+	}
+
+	return servicesConfigMap[serviceName]
 }
