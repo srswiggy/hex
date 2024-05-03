@@ -8,6 +8,8 @@ Why Hex? Well, we all know how time-consuming and repetitive deployments can be,
 
 Here's where Hex steps in. It removes all the unnecessary hassle by providing pre-built configurations. Imagine creating a deploy file for all selected services, including relevant dependencies, with just a few commands. That’s Hex for you—making deployments fast and simple.
 
+## Demo Video
+![Demo Video.gif](static/demo_vid.gif)
 ## Installing Hex
 
 To start using Hex, you have two main options for installation:
