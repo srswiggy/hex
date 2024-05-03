@@ -7,6 +7,7 @@
 Why Hex? Well, we all know how time-consuming and repetitive deployments can be, especially on ephemeral environments. The usual routine involves hopping between multiple files to configure snapshot tags for each repository, which isn't exactly anyone’s idea of fun.
 
 Here's where Hex steps in. It removes all the unnecessary hassle by providing pre-built configurations. Imagine creating a deploy file for all selected services, including relevant dependencies, with just a few commands. That’s Hex for you—making deployments fast and simple.
+[Demo Video](static%2Fdemo_vid.mov)
 
 ## Installing Hex
 
