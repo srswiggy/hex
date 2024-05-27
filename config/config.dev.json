@@ -1,0 +1,5 @@
+{
+  "test": "echo \"Dev Env\"",
+  "deploy": "",
+  "services_url": "https://raw.githubusercontent.com/srswiggy/shuttel-services/main/services.json"
+}
