@@ -1,0 +1,510 @@
+{
+  "templates": {
+    "finance": {
+      "envTemplateName": "finp2p3",
+      "org": "food-bl",
+      "pod": "finance",
+      "envOwners": "[\"rishabh.singh@swiggy.in\",\"karthik.kulkarni@swiggy.in\",\"naveen.singh@swiggy.in\"]",
+      "ttlInHours": "",
+      "additionalComponents": [
+        "kafka",
+        "kong",
+        "consul",
+        "dax",
+        "consumerHaProxy"
+      ],
+      "services": [
+        {
+          "name": "finance-job-service",
+          "version": "latest",
+          "dependentServices": [
+            "finance-calcy-service"
+          ],
+          "isMockService": false,
+          "commitSha": "",
+          "file": "app.yaml",
+          "branchName": "master",
+          "repo": "finance-job"
+        },
+        {
+          "name": "finance-cash-service",
+          "version": "latest",
+          "dependentServices": [
+            "de-bazaar-service"
+          ],
+          "isMockService": false,
+          "commitSha": "",
+          "file": "app.yaml",
+          "branchName": "master",
+          "repo": "finance-cash-service"
+        },
+        {
+          "name": "finance-calcy-service",
+          "version": "latest",
+          "dependentServices": [],
+          "isMockService": false,
+          "commitSha": "",
+          "file": "app.yaml",
+          "branchName": "master",
+          "repo": "finance-calcy-service"
+        },
+        {
+          "name": "finance-erp-service",
+          "version": "latest",
+          "dependentServices": [],
+          "isMockService": false,
+          "commitSha": "",
+          "file": "app.yaml",
+          "branchName": "master",
+          "repo": "finance-erp-service"
+        },
+        {
+          "name": "finance-orchestrator",
+          "version": "latest",
+          "dependentServices": [
+            "finance-recon-platform",
+            "finance-scheduler-service",
+            "finance-calcy-service"
+          ],
+          "isMockService": false,
+          "commitSha": "",
+          "file": "app.yaml",
+          "branchName": "master",
+          "repo": "finance-orchestrator"
+        },
+        {
+          "name": "lassi",
+          "version": "latest",
+          "dependentServices": [
+            "finance-erp-service",
+            "finance-recon-platform",
+            "finance-calcy-service",
+            "finance-orchestrator",
+            "finance-de-payout-service"
+          ],
+          "isMockService": false,
+          "commitSha": "",
+          "file": "app.yaml",
+          "branchName": "master",
+          "repo": "lassi"
+        },
+        {
+          "name": "finance-scheduler-service",
+          "version": "latest",
+          "dependentServices": [],
+          "isMockService": false,
+          "commitSha": "",
+          "file": "app.yaml",
+          "branchName": "master",
+          "repo": "finance-scheduler-service"
+        },
+        {
+          "name": "gripmock-service",
+          "version": "1.2.00-5126-gripmock-service",
+          "dependentServices": [],
+          "isMockService": true,
+          "commitSha": "",
+          "file": "gripmock-service/app.yaml",
+          "branchName": "master",
+          "repo": "swiggy-integration-mock"
+        },
+        {
+          "name": "finance-cash-dashboard",
+          "version": "latest",
+          "dependentServices": [
+            "finance-cash-service",
+            "finance-calcy-service"
+          ],
+          "isMockService": false,
+          "commitSha": "",
+          "file": "app.yaml",
+          "branchName": "master",
+          "repo": "finance-cash-dashboard"
+        },
+        {
+          "name": "finance-dashboard",
+          "version": "latest",
+          "dependentServices": [
+            "finance-calcy-service",
+            "lassi"
+          ],
+          "isMockService": false,
+          "commitSha": "",
+          "file": "app.yaml",
+          "branchName": "master",
+          "repo": "finance-dashboard"
+        },
+        {
+          "name": "finance-conaro",
+          "version": "latest",
+          "dependentServices": [],
+          "isMockService": false,
+          "commitSha": "",
+          "file": "app.yaml",
+          "branchName": "master",
+          "repo": "conaro"
+        },
+        {
+          "name": "finance-recon-platform",
+          "version": "latest",
+          "dependentServices": [
+            "finance-calcy-service",
+            "finance-pg-reconciliation",
+            "uoms-event-lambda-v1"
+          ],
+          "isMockService": false,
+          "commitSha": "",
+          "file": "ephemeral-app.yaml",
+          "branchName": "master",
+          "repo": "recon-platform"
+        },
+        {
+          "name": "finance-pg-reconciliation",
+          "version": "latest",
+          "dependentServices": [
+            "uoms-event-lambda-v1"
+          ],
+          "isMockService": false,
+          "commitSha": "",
+          "file": "ephemeral-app.yaml",
+          "branchName": "master",
+          "repo": "finance-pg-reconciliation"
+        },
+        {
+          "name": "finance-reconciliation-service",
+          "version": "latest",
+          "dependentServices": [
+            "finance-calcy-service",
+            "finance-recon-platform",
+            "uoms-event-lambda-v1"
+          ],
+          "isMockService": false,
+          "commitSha": "",
+          "file": "app.yaml",
+          "branchName": "master",
+          "repo": "reconciliation-service"
+        },
+        {
+          "name": "circus",
+          "version": "latest",
+          "dependentServices": [
+            "finance-calcy-service"
+          ],
+          "isMockService": false,
+          "commitSha": "",
+          "file": "app.yaml",
+          "branchName": "master",
+          "repo": "circus"
+        },
+        {
+          "name": "taco-invoicing",
+          "version": "latest",
+          "dependentServices": [
+            "finance-calcy-service",
+            "finance-reconciliation-service"
+          ],
+          "isMockService": false,
+          "commitSha": "",
+          "file": "app.yaml",
+          "branchName": "master",
+          "repo": "taco-invoicing"
+        },
+        {
+          "name": "checkout-service",
+          "version": "latest",
+          "dependentServices": [
+            "cms-base-service",
+            "ods",
+            "orderability-service"
+          ],
+          "isMockService": false,
+          "commitSha": "",
+          "file": "app.yaml",
+          "branchName": "master",
+          "repo": "checkout-services-apis"
+        },
+        {
+          "name": "orderability-service",
+          "version": "latest",
+          "dependentServices": [],
+          "isMockService": false,
+          "commitSha": "",
+          "file": "app.yaml",
+          "branchName": "master",
+          "repo": "orderability-service"
+        },
+        {
+          "name": "checkout-consumer",
+          "version": "latest",
+          "dependentServices": [
+            "checkout-service",
+            "cms-base-service",
+            "ods",
+            "uoms-event-lambda-v1",
+            "orderability-service"
+          ],
+          "isMockService": false,
+          "commitSha": "",
+          "file": "app-consumer.yaml",
+          "branchName": "master",
+          "repo": "checkout-services-apis"
+        },
+        {
+          "name": "ods",
+          "version": "latest",
+          "dependentServices": [
+            "order-platform"
+          ],
+          "isMockService": false,
+          "commitSha": "",
+          "file": "app.yaml",
+          "branchName": "master",
+          "repo": "ods"
+        },
+        {
+          "name": "order-platform",
+          "version": "latest",
+          "dependentServices": [
+            "uoms-event-lambda-v1"
+          ],
+          "isMockService": false,
+          "commitSha": "",
+          "file": "app.yaml",
+          "branchName": "master",
+          "repo": "order-platform"
+        },
+        {
+          "name": "cms-base-service",
+          "version": "latest",
+          "dependentServices": [],
+          "isMockService": false,
+          "commitSha": "",
+          "file": "app.yaml",
+          "branchName": "master",
+          "repo": "swiggy-cms-services"
+        },
+        {
+          "name": "uoms-event-lambda-v1",
+          "version": "latest",
+          "dependentServices": [],
+          "isMockService": false,
+          "commitSha": "",
+          "file": "event-lambda/v1/app.yaml",
+          "branchName": "master",
+          "repo": "uoms-lambda"
+        },
+        {
+          "name": "finance-de-payout-service",
+          "version": "latest",
+          "dependentServices": [
+            "finance-calcy-service",
+            "de-bazaar-service"
+          ],
+          "isMockService": false,
+          "commitSha": "",
+          "file": "app.yaml",
+          "branchName": "integration",
+          "repo": "finance-de-payout-service"
+        },
+        {
+          "name": "finance-oneview",
+          "version": "latest",
+          "dependentServices": [],
+          "isMockService": false,
+          "commitSha": "",
+          "file": "app.yaml",
+          "branchName": "master",
+          "repo": "finance-oneview"
+        },
+        {
+          "name": "ozone-authz-1",
+          "version": "latest",
+          "dependentServices": [],
+          "isMockService": false,
+          "commitSha": "",
+          "file": "shuttle/deploy/ozone-authz-1/app.yaml",
+          "branchName": "master",
+          "repo": "sentinel"
+        },
+        {
+          "name": "commvault",
+          "version": "latest",
+          "dependentServices": [
+            "finance-calcy-service"
+          ],
+          "isMockService": false,
+          "commitSha": "",
+          "file": "app.yaml",
+          "branchName": "master",
+          "repo": "commvault"
+        },
+        {
+          "name": "swiggy-test-executor",
+          "version": "1.2.00-4252",
+          "dependentServices": [
+            "checkout-service",
+            "finance-cash-service",
+            "finance-erp-service",
+            "finance-calcy-service",
+            "finance-recon-platform",
+            "finance-reconciliation-service",
+            "finance-conaro",
+            "finance-scheduler-service",
+            "lassi",
+            "commvault",
+            "finance-de-payout-service",
+            "finance-orchestrator",
+            "cms-base-service",
+            "finance-pg-reconciliation"
+          ],
+          "isMockService": false,
+          "commitSha": "",
+          "file": "deployments/finance/finance-app.yaml",
+          "branchName": "master",
+          "repo": "swiggy-test-executor"
+        },
+        {
+          "name": "finance-nodal-service",
+          "version": "latest",
+          "dependentServices": [
+            "finance-calcy-service"
+          ],
+          "isMockService": false,
+          "commitSha": "",
+          "file": "app.yaml",
+          "branchName": "master",
+          "repo": "finance-nodal-service"
+        },
+        {
+          "name": "finance-perf-service",
+          "version": "1.2.00-4301-finance-perf-service",
+          "dependentServices": [],
+          "isMockService": true,
+          "commitSha": "",
+          "file": "finance-perf-service/app.yaml",
+          "branchName": "master",
+          "repo": "swiggy-integration-mock"
+        },
+        {
+          "name": "communication-service",
+          "version": "1.2.00-1827-communication-service",
+          "dependentServices": [],
+          "isMockService": true,
+          "commitSha": "",
+          "file": "communication-service/app.yaml",
+          "branchName": "master",
+          "repo": "swiggy-integration-mock"
+        },
+        {
+          "name": "ads-dsp",
+          "version": "1.2.00-3073-ads-dsp",
+          "dependentServices": [],
+          "isMockService": true,
+          "commitSha": "",
+          "file": "ads-dsp/app.yaml",
+          "branchName": "master",
+          "repo": "swiggy-integration-mock"
+        },
+        {
+          "name": "swigconfig",
+          "version": "latest",
+          "dependentServices": [
+            "cp-controller"
+          ],
+          "isMockService": false,
+          "commitSha": "",
+          "file": "configservice/app.yaml",
+          "branchName": "master",
+          "repo": "cp"
+        },
+        {
+          "name": "cp-controller",
+          "version": "latest",
+          "dependentServices": null,
+          "isMockService": false,
+          "commitSha": "",
+          "file": "controller/app.yaml",
+          "branchName": "master",
+          "repo": "cp"
+        },
+        {
+          "name": "config-ui",
+          "version": "latest",
+          "dependentServices": [
+            "cp-controller"
+          ],
+          "isMockService": false,
+          "commitSha": "",
+          "file": "app.yaml",
+          "branchName": "master",
+          "repo": "config-ui"
+        },
+        {
+          "name": "de-bazaar-service",
+          "version": "latest",
+          "dependentServices": [],
+          "isMockService": false,
+          "commitSha": "",
+          "file": "app.yaml",
+          "branchName": "master",
+          "repo": "de-bazaar-service"
+        },
+        {
+          "name": "payments",
+          "version": "1.2.00-7292-payments",
+          "dependentServices": [],
+          "isMockService": true,
+          "commitSha": "",
+          "file": "payments/app.yaml",
+          "branchName": "paymentsMock",
+          "repo": "swiggy-integration-mock"
+        },
+        {
+          "name": "mock-service",
+          "version": "1.2.00-7293-mock-service",
+          "dependentServices": [],
+          "isMockService": true,
+          "commitSha": "",
+          "file": "mock-service/app.yaml",
+          "branchName": "master",
+          "repo": "swiggy-integration-mock"
+        }
+      ],
+      "createdBy": "rishabh.singh@swiggy.in",
+      "createdAt": "",
+      "updatedBy": "rishabh.singh@swiggy.in",
+      "updatedAt": "1713942892",
+      "envType": "dev",
+      "environmentTask": [
+        {
+          "taskTriggerEnvState": "readyToUse",
+          "taskType": "http",
+          "taskPlaneType": "control",
+          "taskData": {
+            "endpoint": "https://blunn9m1ji.execute-api.ap-southeast-1.amazonaws.com/v0/trigger-test",
+            "header": {
+              "userId": "shubhanker.binaloach@swiggy.in"
+            },
+            "method": "POST",
+            "payload": {
+              "artifact_id": "sit-finance",
+              "envInstanceName": "${EnvInstanceName}",
+              "group_id": "sit-finance",
+              "repository": "sit-finance-release",
+              "test_details": [
+                {
+                  "resource_name": "finance/financeSanityWithSeedData.xml",
+                  "resource_type": "FILE",
+                  "tests": null
+                }
+              ],
+              "test_type": "IMPERATIVE",
+              "version": "1.0.00-540"
+            }
+          }
+        }
+      ],
+      "ttl": 0
+    }
+  }
+}

@@ -5,37 +5,21 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"hex/data_model"
 )
 
 type secondModel struct {
-	filteredServicesList []*Service
-	pointer              int
-	snapshotDataTextBox  textinput.Model
+	filteredServicesList []*struct {
+		Service    data_model.Service
+		IsSelected bool
+		Input      string
+	}
+	pointer             int
+	snapshotDataTextBox textinput.Model
 }
 
 func (m secondModel) Init() tea.Cmd {
 	return nil
-}
-
-func initialSecondModel() secondModel {
-	ti := textinput.New()
-	ti.Focus()
-	ti.Placeholder = "Enter Snapshot Tag for Service"
-
-	servicesList := []*Service{
-		{name: "finance-calcy-service", selected: true},
-		{name: "finance-job-service", selected: true},
-		{name: "finance-orchestrator", selected: true},
-		{name: "finance-dashboard", selected: false},
-	}
-
-	var selectedServices []*Service
-	for _, service := range servicesList {
-		if service.selected {
-			selectedServices = append(selectedServices, service)
-		}
-	}
-	return secondModel{filteredServicesList: selectedServices, snapshotDataTextBox: ti}
 }
 
 func (m secondModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -51,7 +35,7 @@ func (m secondModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				ti.Placeholder = "Enter Environment Name"
 				return thirdModel{servicesList: m.filteredServicesList, envNameTextBox: ti}, nil
 			} else {
-				m.filteredServicesList[m.pointer].input = m.snapshotDataTextBox.Value()
+				m.filteredServicesList[m.pointer].Input = m.snapshotDataTextBox.Value()
 				m.snapshotDataTextBox.Reset()
 				m.pointer++
 			}
@@ -67,14 +51,14 @@ func (m secondModel) View() string {
 	var styleMagenta = lipgloss.NewStyle().Foreground(lipgloss.Color("5"))
 	s := ""
 	for _, service := range m.filteredServicesList {
-		if len(service.input) > 0 {
-			s += fmt.Sprintf("%s: %s\n", styleMagenta.Render(service.name), service.input)
+		if len(service.Input) > 0 {
+			s += fmt.Sprintf("%s: %s\n", styleMagenta.Render(service.Service.Name), service.Input)
 		}
 	}
 	if m.pointer >= len(m.filteredServicesList) {
 		s += "\nAll inputs complete, Press Enter to create deploy.json"
 		return s
 	}
-	s += fmt.Sprintf("Input data for %s: %s", style.Render(m.filteredServicesList[m.pointer].name), m.snapshotDataTextBox.View())
+	s += fmt.Sprintf("Input data for %s: %s", style.Render(m.filteredServicesList[m.pointer].Service.Name), m.snapshotDataTextBox.View())
 	return s
 }

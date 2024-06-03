@@ -7,9 +7,10 @@ import (
 )
 
 type EnvConfig struct {
-	Test        string
-	Deploy      string
-	ServicesUrl string `json:"services_url"`
+	Test             string
+	Deploy           string
+	Url              string
+	DisplayThreshold int
 }
 
 var Configuration EnvConfig

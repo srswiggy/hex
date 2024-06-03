@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"hex/data_model"
 	"os"
 	"os/exec"
 )
@@ -24,20 +25,24 @@ type Services struct {
 	Repo              string   `json:"repo"`
 }
 type ConfigFile struct {
-	EnvName  string     `json:"envName"`
-	Services []Services `json:"services"`
+	EnvName  string               `json:"envName"`
+	Services []data_model.Service `json:"services"`
 }
 
-func createAndSaveJson(envName string, services []*Service) {
-	var configServices []Services
+func createAndSaveJson(envName string, services []*struct {
+	Service    data_model.Service
+	IsSelected bool
+	Input      string
+}) {
+	configuredServices := []data_model.Service{}
 	for _, service := range services {
-		config := getServicesConfig(service.name)
-		config.Version = service.input
-		configServices = append(configServices, config)
+		service.Service.Version = service.Input
+		configuredServices = append(configuredServices, service.Service)
 	}
-	newConfig := &ConfigFile{
+
+	newConfig := ConfigFile{
 		EnvName:  envName,
-		Services: configServices,
+		Services: configuredServices,
 	}
 
 	jsonData, err := json.Marshal(newConfig)
