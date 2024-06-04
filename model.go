@@ -5,7 +5,6 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"hex/config"
 	"hex/data_model"
 	"hex/utility"
 	"strings"
@@ -118,8 +117,8 @@ func (m model) View() string {
 	s := "Enter your search query:\n"
 	s += m.listSearchQueryTextBox.View() + "\n\n"
 
-	displayThreshold := config.GetConfig().DisplayThreshold
-
+	//displayThreshold := config.GetConfig().DisplayThreshold
+	displayThreshold := 6
 	var displayStartIndex, displayEndIndex int
 
 	// Calculate start and end indices

@@ -3,15 +3,14 @@ package utility
 import (
 	"encoding/json"
 	"fmt"
-	"hex/config"
 	"hex/data_model"
 	"io/ioutil"
 	"net/http"
 )
 
 func GetTemplates() data_model.Template {
-	cfg := config.GetConfig()
-	url := cfg.Url
+	//cfg := config.GetConfig()
+	url := "https://raw.githubusercontent.com/srswiggy/shuttel-services/main/services.json"
 
 	resp, err := http.Get(url)
 	if err != nil {
