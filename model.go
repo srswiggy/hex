@@ -5,14 +5,24 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"hex/data_model"
+	"hex/utility"
 	"strings"
 )
 
 type model struct {
-	servicesList           []*Service
+	servicesList []*struct {
+		Service    data_model.Service
+		IsSelected bool
+		Input      string
+	}
 	pointer                int
-	filteredServicesList   []*Service
 	listSearchQueryTextBox textinput.Model
+	filteredServicesList   []*struct {
+		Service    data_model.Service
+		IsSelected bool
+		Input      string
+	}
 }
 
 func (m model) Init() tea.Cmd {
@@ -21,21 +31,12 @@ func (m model) Init() tea.Cmd {
 }
 
 func initialModel() model {
-	ti := textinput.New()
-	ti.Focus()
-	ti.Width = 20
-	ti.Placeholder = "Search Service"
-
-	servicesList := []*Service{
-		{name: "finance-calcy-service", selected: false},
-		{name: "finance-job-service", selected: false},
-		{name: "finance-orchestrator", selected: false},
-		{name: "finance-dashboard", selected: false},
-	}
+	fetchedTemplates := utility.GetTemplates()
+	services := initializeServicesList(fetchedTemplates.Services)
 	return model{
-		servicesList:           servicesList,
-		filteredServicesList:   []*Service{},
-		listSearchQueryTextBox: ti,
+		servicesList:           services,
+		listSearchQueryTextBox: generateTextInputBox(),
+		filteredServicesList:   services,
 	}
 }
 
@@ -58,9 +59,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.pointer++
 			}
 		} else if msg.Type == tea.KeyEnter {
-			var selectedServices []*Service
+			var selectedServices []*struct {
+				Service    data_model.Service
+				IsSelected bool
+				Input      string
+			}
 			for _, service := range m.servicesList {
-				if service.selected {
+				if service.IsSelected {
 					selectedServices = append(selectedServices, service)
 				}
 			}
@@ -72,10 +77,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			ti.Placeholder = "Enter Snapshot Tag for Service"
 			return secondModel{filteredServicesList: selectedServices, snapshotDataTextBox: ti}, nil
 		} else if msg.String() == " " || msg.Type == tea.KeySpace {
-			if m.filteredServicesList[m.pointer].selected {
-				m.filteredServicesList[m.pointer].selected = false
+			if m.filteredServicesList[m.pointer].IsSelected {
+				m.filteredServicesList[m.pointer].IsSelected = false
 			} else {
-				m.filteredServicesList[m.pointer].selected = true
+				m.filteredServicesList[m.pointer].IsSelected = true
 			}
 		} else {
 			// Update the listSearchQuery with the new character
@@ -84,13 +89,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		// Filter the items based on the listSearchQuery
-		m.filteredServicesList = []*Service{}
+		m.filteredServicesList = []*struct {
+			Service    data_model.Service
+			IsSelected bool
+			Input      string
+		}{}
 		if len(m.listSearchQueryTextBox.Value()) > 0 {
 			for _, item := range m.servicesList {
-				if strings.Contains(strings.ToLower(item.name), strings.ToLower(m.listSearchQueryTextBox.Value())) {
+				if strings.Contains(strings.ToLower(item.Service.Name), strings.ToLower(m.listSearchQueryTextBox.Value())) {
 					m.filteredServicesList = append(m.filteredServicesList, item)
 				}
 			}
+		} else if len(m.listSearchQueryTextBox.Value()) == 0 {
+			m.filteredServicesList = m.servicesList
 		}
 	}
 
@@ -106,37 +117,84 @@ func (m model) View() string {
 	s := "Enter your search query:\n"
 	s += m.listSearchQueryTextBox.View() + "\n\n"
 
-	if len(m.filteredServicesList) == 0 {
-		s += "No matching items found"
+	//displayThreshold := config.GetConfig().DisplayThreshold
+	displayThreshold := 6
+	var displayStartIndex, displayEndIndex int
+
+	// Calculate start and end indices
+	listlen := len(m.filteredServicesList)
+	if m.pointer < displayThreshold/2 {
+		displayStartIndex = 0
+		displayEndIndex = displayThreshold
+	} else if m.pointer >= listlen-displayThreshold/2 {
+		displayStartIndex = listlen - displayThreshold
+		displayEndIndex = listlen
 	} else {
-		for i, item := range m.filteredServicesList {
-			pointer := " "
-			if m.pointer == i {
-				pointer = ">"
-			}
+		displayStartIndex = m.pointer - displayThreshold/2
+		displayEndIndex = m.pointer + displayThreshold/2
+	}
 
-			checked := " "
-			if item.selected {
-				checked = "x"
-			}
+	// Adjust displayEndIndex if it's out of range
+	if displayEndIndex > listlen {
+		displayEndIndex = listlen
+	}
 
-			if pointer == ">" {
-				s += style.Render(fmt.Sprintf("%s [%s] %s", pointer, checked, item.name)) + "\n"
-			} else {
-				s += fmt.Sprintf("%s [%s] %s", pointer, checked, item.name) + "\n"
-			}
+	// Render the list
+	for i := displayStartIndex; i < displayEndIndex; i++ {
+		item := m.filteredServicesList[i]
+		pointer := " "
+		if m.pointer == i {
+			pointer = ">"
+		}
 
+		checked := " "
+		if i < listlen && m.filteredServicesList[i].IsSelected {
+			checked = "x"
+		}
+		if pointer == ">" {
+			s += style.Render(fmt.Sprintf("%s [%s] %s", pointer, checked, item.Service.Name))
+			s += "\n"
+		} else {
+			s += fmt.Sprintf("%s [%s] %s\n", pointer, checked, item.Service.Name)
 		}
 	}
-	// Show Selected Services
-	selectedServices := "\n\n============ Selected Services ==========\n"
-	i := 1
-	for _, service := range m.servicesList {
-		if service.selected == true {
-			selectedServices += fmt.Sprintf("%d. %s\n", i, service.name)
-			i++
-		}
+
+	if listlen == 0 {
+		s += fmt.Sprintf("No results found in your search query.\n\n")
 	}
-	s += selectedServices
 	return s
+}
+
+func initializeServicesList(services []data_model.Service) []*struct {
+	Service    data_model.Service
+	IsSelected bool
+	Input      string
+} {
+	newList := make([]*struct {
+		Service    data_model.Service
+		IsSelected bool
+		Input      string
+	}, len(services))
+
+	for i := range newList {
+		newList[i] = &struct {
+			Service    data_model.Service
+			IsSelected bool
+			Input      string
+		}{
+			Service:    services[i],
+			IsSelected: false,
+			Input:      "",
+		}
+	}
+
+	return newList
+}
+
+func generateTextInputBox() textinput.Model {
+	ti := textinput.New()
+	ti.Focus()
+	ti.Width = 20
+	ti.Placeholder = "Search Service"
+	return ti
 }

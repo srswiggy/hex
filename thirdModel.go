@@ -5,6 +5,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/muesli/reflow/wordwrap"
+	"hex/data_model"
 	"hex/utility"
 )
 
@@ -13,7 +14,11 @@ func (m thirdModel) Init() tea.Cmd {
 }
 
 type thirdModel struct {
-	servicesList   []*Service
+	servicesList []*struct {
+		Service    data_model.Service
+		IsSelected bool
+		Input      string
+	}
 	envNameTextBox textinput.Model
 	jsonCreated    bool
 	deployed       bool

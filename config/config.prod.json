@@ -1,0 +1,6 @@
+{
+  "test": "echo \"Prod Env\"",
+  "deploy": "",
+  "url": "https://raw.githubusercontent.com/srswiggy/shuttel-services/main/services.json",
+  "displayThreshold": 6
+}
