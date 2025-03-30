@@ -2,27 +2,20 @@ package main
 
 import (
 	"fmt"
-	"github.com/charmbracelet/bubbles/textinput"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"hex/data_model"
 	"hex/utility"
 	"strings"
+
+	"github.com/charmbracelet/bubbles/textinput"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type model struct {
-	servicesList []*struct {
-		Service    data_model.Service
-		IsSelected bool
-		Input      string
-	}
+	servicesList           []*data_model.ModelService
 	pointer                int
 	listSearchQueryTextBox textinput.Model
-	filteredServicesList   []*struct {
-		Service    data_model.Service
-		IsSelected bool
-		Input      string
-	}
+	filteredServicesList   []*data_model.ModelService
 }
 
 func (m model) Init() tea.Cmd {
@@ -31,8 +24,9 @@ func (m model) Init() tea.Cmd {
 }
 
 func initialModel() model {
-	fetchedTemplates := utility.GetTemplates()
-	services := initializeServicesList(fetchedTemplates.Services)
+	fetchedEnvironmentTemplates := utility.GetTemplates()
+	services := initializeServicesList(&fetchedEnvironmentTemplates)
+	// fmt.Println(services)
 	return model{
 		servicesList:           services,
 		listSearchQueryTextBox: generateTextInputBox(),
@@ -46,7 +40,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// Is it a key press?
 	case tea.KeyMsg:
-		if msg.Type == tea.KeyCtrlC {
+		if msg.Type == tea.KeyCtrlC || msg.Type == tea.KeyEsc {
 			return m, tea.Quit
 		}
 
@@ -59,11 +53,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.pointer++
 			}
 		} else if msg.Type == tea.KeyEnter {
-			var selectedServices []*struct {
-				Service    data_model.Service
-				IsSelected bool
-				Input      string
-			}
+			var selectedServices []*data_model.ModelService
 			for _, service := range m.servicesList {
 				if service.IsSelected {
 					selectedServices = append(selectedServices, service)
@@ -89,11 +79,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		// Filter the items based on the listSearchQuery
-		m.filteredServicesList = []*struct {
-			Service    data_model.Service
-			IsSelected bool
-			Input      string
-		}{}
+		m.filteredServicesList = []*data_model.ModelService{}
 		if len(m.listSearchQueryTextBox.Value()) > 0 {
 			for _, item := range m.servicesList {
 				if strings.Contains(strings.ToLower(item.Service.Name), strings.ToLower(m.listSearchQueryTextBox.Value())) {
@@ -102,6 +88,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		} else if len(m.listSearchQueryTextBox.Value()) == 0 {
 			m.filteredServicesList = m.servicesList
+		}
+
+		// Fix for Issue 2: Reset pointer if it's out of bounds after filtering
+		if len(m.filteredServicesList) == 0 {
+			m.pointer = 0
+		} else if m.pointer >= len(m.filteredServicesList) {
+			m.pointer = 0
 		}
 	}
 
@@ -113,7 +106,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) View() string {
 	var style = lipgloss.NewStyle().
 		Foreground(lipgloss.Color("5"))
-
+	// var greenStyle = lipgloss.NewStyle().
+	// 	Foreground(lipgloss.Color("3"))
 	s := "Enter your search query:\n"
 	s += m.listSearchQueryTextBox.View() + "\n\n"
 
@@ -151,40 +145,40 @@ func (m model) View() string {
 		if i < listlen && m.filteredServicesList[i].IsSelected {
 			checked = "x"
 		}
+
+		var mockStatus string = ""
+		if item.Service.IsMockService {
+			mockStatus = "[ Mock Service ]"
+		}
+
 		if pointer == ">" {
-			s += style.Render(fmt.Sprintf("%s [%s] %s", pointer, checked, item.Service.Name))
+			s += style.Render(fmt.Sprintf("%s [%s] %-30s [ %s ] %s", pointer, checked, item.Service.Name, item.Pod, mockStatus))
 			s += "\n"
 		} else {
-			s += fmt.Sprintf("%s [%s] %s\n", pointer, checked, item.Service.Name)
+			s += fmt.Sprintf("%s [%s] %-30s [ %s ] %s\n", pointer, checked, item.Service.Name, item.Pod, mockStatus)
 		}
 	}
 
 	if listlen == 0 {
 		s += fmt.Sprintf("No results found in your search query.\n\n")
 	}
+
+	s += firstScreenBottomIntructions()
 	return s
 }
 
-func initializeServicesList(services []data_model.Service) []*struct {
-	Service    data_model.Service
-	IsSelected bool
-	Input      string
-} {
-	newList := make([]*struct {
-		Service    data_model.Service
-		IsSelected bool
-		Input      string
-	}, len(services))
+func initializeServicesList(templates *data_model.Templates) []*data_model.ModelService {
+	var newList []*data_model.ModelService
+	for _, template := range templates.Templates {
+		services := template.Services
 
-	for i := range newList {
-		newList[i] = &struct {
-			Service    data_model.Service
-			IsSelected bool
-			Input      string
-		}{
-			Service:    services[i],
-			IsSelected: false,
-			Input:      "",
+		for _, service := range services {
+			newList = append(newList, &data_model.ModelService{
+				Service:    service,
+				IsSelected: false,
+				Input:      "",
+				Pod:        template.Pod,
+			})
 		}
 	}
 
@@ -197,4 +191,16 @@ func generateTextInputBox() textinput.Model {
 	ti.Width = 20
 	ti.Placeholder = "Search Service"
 	return ti
+}
+
+func firstScreenBottomIntructions() string {
+	var style = lipgloss.NewStyle().
+		Foreground(lipgloss.Color("5"))
+	return "\n\n" +
+		style.Render("Space Bar") +
+		" to select/deselect service\n" +
+		style.Render("Ctrl+C or Esc") +
+		" to quit anytime\n" +
+		style.Render("Enter") +
+		" to proceed to another screen"
 }

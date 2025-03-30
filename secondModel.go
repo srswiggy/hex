@@ -9,13 +9,9 @@ import (
 )
 
 type secondModel struct {
-	filteredServicesList []*struct {
-		Service    data_model.Service
-		IsSelected bool
-		Input      string
-	}
-	pointer             int
-	snapshotDataTextBox textinput.Model
+	filteredServicesList []*data_model.ModelService
+	pointer              int
+	snapshotDataTextBox  textinput.Model
 }
 
 func (m secondModel) Init() tea.Cmd {
@@ -60,5 +56,17 @@ func (m secondModel) View() string {
 		return s
 	}
 	s += fmt.Sprintf("Input data for %s: %s", style.Render(m.filteredServicesList[m.pointer].Service.Name), m.snapshotDataTextBox.View())
+
+	s += secondScreenBottomIntructions()
 	return s
+}
+
+func secondScreenBottomIntructions() string {
+	var style = lipgloss.NewStyle().
+		Foreground(lipgloss.Color("5"))
+	return "\n\n" +
+		style.Render("Ctrl+C") +
+		" to quit anytime\n" +
+		style.Render("Enter") +
+		" to proceed to another screen"
 }

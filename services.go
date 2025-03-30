@@ -29,11 +29,7 @@ type ConfigFile struct {
 	Services []data_model.Service `json:"services"`
 }
 
-func createAndSaveJson(envName string, services []*struct {
-	Service    data_model.Service
-	IsSelected bool
-	Input      string
-}) {
+func createAndSaveJson(envName string, services []*data_model.ModelService) {
 	configuredServices := []data_model.Service{}
 	for _, service := range services {
 		service.Service.Version = service.Input
@@ -77,50 +73,4 @@ func deployJson(envname string) string {
 
 	// Return the output
 	return string(output)
-}
-
-func getServicesConfig(serviceName string) Services {
-	var servicesConfigMap = make(map[string]Services)
-
-	servicesConfigMap["finance-calcy-service"] = Services{
-		Name:              "finance-calcy-service",
-		DependentServices: make([]string, 0),
-		IsMockService:     false,
-		CommitSha:         "",
-		File:              "app.yaml",
-		BranchName:        "master",
-		Repo:              "finance-calcy-service",
-	}
-
-	servicesConfigMap["finance-job-service"] = Services{
-		Name:              "finance-job-service",
-		DependentServices: []string{"finance-calcy-service"},
-		IsMockService:     false,
-		CommitSha:         "",
-		File:              "app.yaml",
-		BranchName:        "master",
-		Repo:              "finance-job",
-	}
-
-	servicesConfigMap["finance-dashboard"] = Services{
-		Name:              "finance-dashboard",
-		DependentServices: []string{"finance-calcy-service", "lassi"},
-		IsMockService:     false,
-		CommitSha:         "",
-		File:              "app.yaml",
-		BranchName:        "master",
-		Repo:              "finance-dashboard",
-	}
-
-	servicesConfigMap["finance-orchestrator"] = Services{
-		Name:              "finance-orchestrator",
-		DependentServices: []string{"finance-recon-platform", "finance-scheduler-service", "finance-calcy-service"},
-		IsMockService:     false,
-		CommitSha:         "",
-		File:              "app.yaml",
-		BranchName:        "master",
-		Repo:              "finance-orchestrator",
-	}
-
-	return servicesConfigMap[serviceName]
 }

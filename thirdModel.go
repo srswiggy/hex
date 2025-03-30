@@ -14,11 +14,7 @@ func (m thirdModel) Init() tea.Cmd {
 }
 
 type thirdModel struct {
-	servicesList []*struct {
-		Service    data_model.Service
-		IsSelected bool
-		Input      string
-	}
+	servicesList   []*data_model.ModelService
 	envNameTextBox textinput.Model
 	jsonCreated    bool
 	deployed       bool

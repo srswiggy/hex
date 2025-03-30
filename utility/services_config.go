@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func GetTemplates() data_model.Template {
+func GetTemplates() data_model.Templates {
 	//cfg := config.GetConfig()
 	url := "https://raw.githubusercontent.com/srswiggy/shuttel-services/main/services.json"
 
@@ -16,27 +16,26 @@ func GetTemplates() data_model.Template {
 	if err != nil {
 		fmt.Printf("Failed to fetch JSON: %v\n", err)
 		fmt.Printf(url)
-		return data_model.Template{}
+		return data_model.Templates{}
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		fmt.Printf("Failed to fetch JSON: HTTP %d\n", resp.StatusCode)
-		return data_model.Template{}
+		return data_model.Templates{}
 	}
 
 	var templates data_model.Templates
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Printf("Failed to read response body: %v\n", err)
-		return data_model.Template{}
+		return data_model.Templates{}
 	}
 
 	err = json.Unmarshal(body, &templates)
 	if err != nil {
 		fmt.Printf("Failed to parse JSON: %v\n", err)
-		return data_model.Template{}
+		return data_model.Templates{}
 	}
-
-	return templates.Templates[0]
+	return templates
 }
