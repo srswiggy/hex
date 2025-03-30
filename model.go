@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/charmbracelet/bubbles/textinput"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"hex/data_model"
 	"hex/utility"
 	"strings"
+
+	"github.com/charmbracelet/bubbles/textinput"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type model struct {
@@ -23,9 +24,9 @@ func (m model) Init() tea.Cmd {
 }
 
 func initialModel() model {
-	fetchedTemplates := utility.GetTemplates()
-	services := initializeServicesList(&fetchedTemplates)
-	fmt.Println(services)
+	fetchedEnvironmentTemplates := utility.GetTemplates()
+	services := initializeServicesList(&fetchedEnvironmentTemplates)
+	// fmt.Println(services)
 	return model{
 		servicesList:           services,
 		listSearchQueryTextBox: generateTextInputBox(),
@@ -88,6 +89,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		} else if len(m.listSearchQueryTextBox.Value()) == 0 {
 			m.filteredServicesList = m.servicesList
 		}
+
+		// Fix for Issue 2: Reset pointer if it's out of bounds after filtering
+		if len(m.filteredServicesList) == 0 {
+			m.pointer = 0
+		} else if m.pointer >= len(m.filteredServicesList) {
+			m.pointer = 0
+		}
 	}
 
 	// Return the updated model to the Bubble Tea runtime for processing.
@@ -98,8 +106,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) View() string {
 	var style = lipgloss.NewStyle().
 		Foreground(lipgloss.Color("5"))
-	var greenStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("3"))
+	// var greenStyle = lipgloss.NewStyle().
+	// 	Foreground(lipgloss.Color("3"))
 	s := "Enter your search query:\n"
 	s += m.listSearchQueryTextBox.View() + "\n\n"
 
@@ -137,17 +145,17 @@ func (m model) View() string {
 		if i < listlen && m.filteredServicesList[i].IsSelected {
 			checked = "x"
 		}
+
 		var mockStatus string = ""
 		if item.Service.IsMockService {
-			mockStatus = "[Mock Service]"
-			greenStyle.Render(mockStatus)
+			mockStatus = "[ Mock Service ]"
 		}
-		if pointer == ">" {
 
-			s += style.Render(fmt.Sprintf("%s [%s] %s\t[%s]\t%s", pointer, checked, item.Service.Name, item.Pod, mockStatus))
+		if pointer == ">" {
+			s += style.Render(fmt.Sprintf("%s [%s] %-30s [ %s ] %s", pointer, checked, item.Service.Name, item.Pod, mockStatus))
 			s += "\n"
 		} else {
-			s += fmt.Sprintf("%s [%s] %s\t[%s]\t%s\n", pointer, checked, item.Service.Name, item.Pod, mockStatus)
+			s += fmt.Sprintf("%s [%s] %-30s [ %s ] %s\n", pointer, checked, item.Service.Name, item.Pod, mockStatus)
 		}
 	}
 
