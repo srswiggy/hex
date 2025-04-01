@@ -11,6 +11,7 @@ import (
 func GetTemplates() data_model.Templates {
 	//cfg := config.GetConfig()
 	url := "https://raw.githubusercontent.com/srswiggy/shuttel-services/main/services.json"
+	config, err := data_model.LoadConfig()
 
 	resp, err := http.Get(url)
 	if err != nil {
@@ -37,5 +38,17 @@ func GetTemplates() data_model.Templates {
 		fmt.Printf("Failed to parse JSON: %v\n", err)
 		return data_model.Templates{}
 	}
-	return templates
+	return data_model.Templates{
+		Templates: Filter(templates.Templates, func(t data_model.Template) bool {
+			if len(config.GetSelectedPods()) == 0 {
+				return true
+			}
+			for _, pod := range config.GetSelectedPods() {
+				if t.Pod == pod {
+					return true
+				}
+			}
+			return false
+		}),
+	}
 }

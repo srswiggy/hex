@@ -163,16 +163,30 @@ func (m model) View() string {
 		s += fmt.Sprintf("No results found in your search query.\n\n")
 	}
 
-	s += firstScreenBottomIntructions()
+	config, err := data_model.LoadConfig()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	if config.GetShowOnScreenOptions() {
+		s += firstScreenBottomIntructions()
+	}
 	return s
 }
 
 func initializeServicesList(templates *data_model.Templates) []*data_model.ModelService {
 	var newList []*data_model.ModelService
+	config, err := data_model.LoadConfig()
+	if err != nil {
+		fmt.Println(err)
+	}
 	for _, template := range templates.Templates {
 		services := template.Services
 
 		for _, service := range services {
+			if !config.GetShowMockServices() && service.IsMockService {
+				continue
+			}
 			newList = append(newList, &data_model.ModelService{
 				Service:    service,
 				IsSelected: false,
